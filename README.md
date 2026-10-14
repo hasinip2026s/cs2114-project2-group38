@@ -6,7 +6,7 @@ A Java console to-do list by students, for students. Users can add tasks, check 
 
 Check It Off keeps track of day-to-day tasks so students know exactly what needs to be finished and when.
 
-- **Add a task** — enter a name, due date and time, status, and priority. Example:
+- **Add a task** — enter a name, due date and time, status, and priority.
 - **View the list** — see every current task, numbered, with all its details.
 - **Update a task** — change a task's status (not started, in-progress, complete) or priority (low, medium, high) at any time.
 - **Check off a task** — remove a finished task from the list.
@@ -33,7 +33,7 @@ Everything is stored in one generic class, `LinkedChain<T>`. The rest of the pro
 
 ### Running it in Eclipse
 
-1. File → Import → General → Existing Projects into Workspace → select this folder
+1. File → Open Projects from File System → select this folder
 2. Right-click the project → Run As → Java Application
 3. Select `Main` as the class to run
 
