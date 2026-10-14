@@ -1,5 +1,6 @@
 import java.time.LocalDateTime;
 
+
  // Holds task's data: name, due date/time, status, and priority.
 
 public class Task {
@@ -10,7 +11,7 @@ public class Task {
     private String priority;
     
     /*
-    Stores the four fields. Assumes the values were already checked by InputValidator.
+    Stores the four fields.
     @param name     the task's name
     @param due      the due date and time
     @param status   "not started", "in-progress", or "complete"
