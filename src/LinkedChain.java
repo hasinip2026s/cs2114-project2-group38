@@ -1,36 +1,48 @@
-/**
- * A generic chain of linked nodes. Use it as the storage inside your
- * own classes, and extend or modify it as your project needs.
- *
- * This class owns storage only: nodes, the head reference, and the
- * count. It contains no application logic. A class that needs a
- * collection should hold a LinkedChain field and call its methods.
- *
- * add() places the new entry at the FRONT of the chain, so entries added
- * with add() come back from toArray() in reverse order of insertion.
- * addToEnd() preserves insertion order.
- *
- * Time complexity, where n is the number of entries:
- *   add              O(1)
- *   addToEnd         O(n)
- *   remove()         O(1)
- *   remove(T)        O(n)
- *   clear            O(1)
- *   get              O(n)
- *   contains         O(n)
- *   count            O(n)
- *   size             O(1)
- *   isEmpty          O(1)
- *   toArray          O(n)
- *
- * @author CS 2114 Staff
- * @version September 2026
- *
- * @param <T> the type of entries stored in the chain
- */
-public class LinkedChain<T>
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+/*
+A generic chain of linked nodes. Use it as the storage inside your
+own classes, and extend or modify it as your project needs.
+
+This class owns storage only: nodes, the head reference, and the
+count. It contains no application logic. A class that needs a
+collection should hold a LinkedChain field and call its methods.
+
+add() places the new entry at the FRONT of the chain, so entries added
+with add() come back from toArray() in reverse order of insertion.
+addToEnd() preserves insertion order.
+
+Changes made for Check It Off:
+- Added a lastNode (tail) reference so addToEnd is O(1) instead of
+walking to the end. Every method that changes the chain keeps it
+up to date.
+- Implements Iterable, so app classes can use a for-each loop
+without calling get(i) in a loop (which would be O(n^2)).
+
+ Time complexity, where n is the number of entries:
+    add              O(1)
+    addToEnd         O(1)
+    remove()         O(1)
+    remove(T)        O(n)
+    clear            O(1)
+    get              O(n)
+    contains         O(n)
+    count            O(n)
+    size             O(1)
+    isEmpty          O(1)
+    toArray          O(n)
+    iterator         O(1) to create, O(n) to walk every entry
+
+@author CS 2114 Staff, modified by Hasini Pottipati
+@version September 2026
+@param <T> the type of entries stored in the chain
+*/
+
+public class LinkedChain<T> implements Iterable<T>
 {
     private Node<T> firstNode;   // reference to the first node, or null
+    private Node<T> lastNode;    // reference to the last node, or null
     private int numberOfEntries; // number of nodes in the chain
 
     /**
@@ -39,10 +51,11 @@ public class LinkedChain<T>
     public LinkedChain()
     {
         firstNode = null;
+        lastNode = null;
         numberOfEntries = 0;
     }
 
-    /**
+    /*
      * Adds a new entry to the front of this chain.
      *
      * @param newEntry the object to be added; must not be null
@@ -53,12 +66,18 @@ public class LinkedChain<T>
     {
         requireNonNull(newEntry);
         firstNode = new Node<T>(newEntry, firstNode);
+        if (lastNode == null)
+        {
+            // the chain was empty, so the new node is also the last one
+            lastNode = firstNode;
+        }
         numberOfEntries++;
         return true;
     }
 
     /**
-     * Adds a new entry to the end of this chain.
+     * Adds a new entry to the end of this chain. Uses lastNode, so it
+     * doesn't have to walk the chain.
      *
      * @param newEntry the object to be added; must not be null
      * @return true
@@ -74,13 +93,9 @@ public class LinkedChain<T>
         }
         else
         {
-            Node<T> current = firstNode;
-            while (current.next != null)
-            {
-                current = current.next;
-            }
-            current.next = newNode;
+            lastNode.next = newNode;
         }
+        lastNode = newNode;
         numberOfEntries++;
         return true;
     }
@@ -98,6 +113,11 @@ public class LinkedChain<T>
         }
         T result = firstNode.data;
         firstNode = firstNode.next;
+        if (firstNode == null)
+        {
+            // that was the only node, so the chain is empty now
+            lastNode = null;
+        }
         numberOfEntries--;
         return result;
     }
@@ -117,6 +137,11 @@ public class LinkedChain<T>
         if (anEntry.equals(firstNode.data))
         {
             firstNode = firstNode.next;
+            if (firstNode == null)
+            {
+                // that was the only node, so the chain is empty now
+                lastNode = null;
+            }
             numberOfEntries--;
             return true;
         }
@@ -127,6 +152,11 @@ public class LinkedChain<T>
             if (anEntry.equals(current.data))
             {
                 previous.next = current.next;
+                if (current == lastNode)
+                {
+                    // removed the last node, so the one before it is last
+                    lastNode = previous;
+                }
                 numberOfEntries--;
                 return true;
             }
@@ -142,6 +172,7 @@ public class LinkedChain<T>
     public void clear()
     {
         firstNode = null;
+        lastNode = null;
         numberOfEntries = 0;
     }
 
@@ -258,6 +289,19 @@ public class LinkedChain<T>
     }
 
     /**
+     * Gives an iterator that goes from the first entry to the last, so
+     * the chain works in a for-each loop. On an empty chain, hasNext()
+     * is false right away.
+     *
+     * @return an iterator over the entries in this chain
+     */
+    @Override
+    public Iterator<T> iterator()
+    {
+        return new ChainIterator();
+    }
+
+    /**
      * Returns a readable listing of the chain, first entry first,
      * e.g. "[a, b, c]".
      *
@@ -292,6 +336,51 @@ public class LinkedChain<T>
         if (entry == null)
         {
             throw new IllegalArgumentException("Cannot add null to chain");
+        }
+    }
+
+    /**
+     * Walks the chain one node at a time for the for-each loop.
+     */
+    private class ChainIterator implements Iterator<T>
+    {
+        private Node<T> nextNode; // the node next() will return
+
+        /**
+         * Starts at the first node.
+         */
+        private ChainIterator()
+        {
+            nextNode = firstNode;
+        }
+
+        /**
+         * Checks if there's another entry.
+         *
+         * @return true if next() has an entry to return
+         */
+        @Override
+        public boolean hasNext()
+        {
+            return nextNode != null;
+        }
+
+        /**
+         * Gets the next entry and moves forward one node.
+         *
+         * @return the next entry
+         * @throws NoSuchElementException if there are no entries left
+         */
+        @Override
+        public T next()
+        {
+            if (nextNode == null)
+            {
+                throw new NoSuchElementException("No more entries");
+            }
+            T result = nextNode.data;
+            nextNode = nextNode.next;
+            return result;
         }
     }
 
