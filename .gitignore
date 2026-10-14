@@ -1,1 +1,12 @@
+# compiled files
 *.class
+bin/
+out/
+
+# the program's save file
+tasks.txt
+
+# IDE files
+.settings/
+.vscode/
+.idea/
