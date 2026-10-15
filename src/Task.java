@@ -83,6 +83,24 @@ public class Task {
         this.priority = priority;
     }
  
+     /*
+    Changes the name.
+    @param name the new name
+    */
+ 
+    public void setName(String name) {
+        this.name = name;
+    }
+ 
+    /*
+    Changes the due date and time.
+    @param due the new due date and time
+    */
+ 
+    public void setDue(LocalDateTime due) {
+        this.due = due;
+    }
+    
     /*
     Turns the priority into a number so GetItDone can compare tasks.
     @return 3 for high, 2 for medium, 1 for low
