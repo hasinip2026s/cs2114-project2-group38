@@ -5,12 +5,12 @@ import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.Scanner;
 
+/**
+* @author Cassidy McCahill
+* @version 2026.10.14
+*/
+
 public class InputValidator {
-    
-    /**
-     * @author Cassidy McCahill
-     * @version 2026.10.14
-     */
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MM-dd-uuuu").withResolverStyle(ResolverStyle.STRICT);
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm").withResolverStyle(ResolverStyle.STRICT);
