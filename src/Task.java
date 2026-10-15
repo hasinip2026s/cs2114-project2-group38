@@ -9,7 +9,6 @@ import java.util.Objects;
  * @version 2026.10.14
  */
 
-
 public class Task {
  
     private String name;
@@ -100,7 +99,7 @@ public class Task {
     public void setDue(LocalDateTime due) {
         this.due = due;
     }
-    
+
     /*
     Turns the priority into a number so GetItDone can compare tasks.
     @return 3 for high, 2 for medium, 1 for low
@@ -163,5 +162,4 @@ public class Task {
         return this.name + " — due " + this.due.format(format) + " — "
             + this.status + " — " + this.priority;
     }
- 
 }
