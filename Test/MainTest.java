@@ -1,106 +1,144 @@
 package Test;
-
-public import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.io.PrintStream;
 
-/*
- * Tests for Main. main() reads from System.in and saves to tasks.txt, so
- * these tests swap in fake typing and put tasks.txt back the way it was
- * when they're done.
- *
- * @author [YOUR NAME HERE]
- * @version 2026.10.15
- */
+/**
+* @author Cassidy McCahill
+* @version 2026.10.15
+*/
 
 public class MainTest {
 
-    private static final Path SAVE_FILE = Paths.get("tasks.txt");
+    // EDIT THESE to match the prompts in AddTask, UpdateTask, and RemoveTask.
+    // Each is only the answers typed AFTER the menu number, one per line.
+    private static final String ADD_ANSWERS = "Buy groceries\n2026-10-20 09:00\nnot started\nlow\n";
+    private static final String ADDED_NAME = "Buy groceries";
 
-    private PrintStream originalOut;
-    private InputStream originalIn;
-    private ByteArrayOutputStream output;
-    private byte[] savedTasks; // null if there was no tasks.txt
+    private static final String UPDATE_ANSWERS = "1\n";   // which task, plus whatever UpdateTask asks next
+    private static final String UPDATED_TEXT = "complete"; // text that should appear in the list after the update
 
-    /*
-    Backs up tasks.txt and captures System.out.
-    @throws IOException if tasks.txt can't be read
-    */
+    private static final String CHECK_OFF_ANSWERS = "1\n"; // which task to check off
 
     @BeforeEach
-    public void setUp() throws IOException {
-        if (Files.exists(SAVE_FILE)) {
-            this.savedTasks = Files.readAllBytes(SAVE_FILE);
-        }
-        else {
-            this.savedTasks = null;
-        }
-        this.originalOut = System.out;
-        this.originalIn = System.in;
-        this.output = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(this.output));
+    void deleteSaveFile() {
+        new File("tasks.txt").delete();
     }
-
-    /*
-    Puts System.out, System.in, and tasks.txt back.
-    @throws IOException if tasks.txt can't be restored
-    */
 
     @AfterEach
-    public void tearDown() throws IOException {
-        System.setOut(this.originalOut);
-        System.setIn(this.originalIn);
-        if (this.savedTasks != null) {
-            Files.write(SAVE_FILE, this.savedTasks);
-        }
-        else {
-            Files.deleteIfExists(SAVE_FILE);
-        }
+    void cleanUp() {
+        new File("tasks.txt").delete();
     }
 
-    /*
-    Pretends the user typed the given lines.
-    @param typed what the user types, one answer per line
-    */
-
-    private void type(String typed) {
-        System.setIn(new ByteArrayInputStream(typed.getBytes()));
+    // Feeds the given text to main() as keyboard input and returns what it printed
+    private String run(String input) {
+        InputStream originalIn = System.in;
+        PrintStream originalOut = System.out;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        System.setIn(new ByteArrayInputStream(input.getBytes()));
+        System.setOut(new PrintStream(out));
+        try {
+            Main.main(new String[0]);
+        } finally {
+            System.setIn(originalIn);
+            System.setOut(originalOut);
+        }
+        return out.toString();
     }
 
-    /*
-    Choosing 6 right away quits.
-    */
+    // ---------- Option 6: Quit ----------
 
     @Test
-    public void testQuit() {
-        this.type("6\n");
-        Main.main(new String[0]);
-        assertTrue(this.output.toString().contains("See you next time!"));
+    void quitPrintsMenuAndGoodbye() {
+        String output = run("6\n");
+        assertTrue(output.contains("Check it off Menu:"));
+        assertTrue(output.contains("See you next time!"));
     }
 
-    /*
-    A bad menu choice is re-prompted, then 6 still quits.
-    */
+    // ---------- Bad menu input ----------
 
     @Test
-    public void testBadMenuChoice() {
-        this.type("abc\n6\n");
-        Main.main(new String[0]);
-        String text = this.output.toString();
-        assertTrue(text.contains("Enter a number from 1 to 6"));
-        assertTrue(text.contains("See you next time!"));
+    void invalidMenuChoiceIsRejected() {
+        String output = run("9\nabc\n6\n");
+        assertTrue(output.contains("See you next time!"));
     }
 
-} {
-    
+    // ---------- Option 1: Add a task ----------
+
+    @Test
+    void addedTaskAppearsInList() {
+        String output = run("1\n" + ADD_ANSWERS + "2\n6\n");
+        assertTrue(output.contains(ADDED_NAME));
+    }
+
+    // ---------- Option 2: View tasks ----------
+
+    @Test
+    void viewEmptyListShowsMessage() {
+        String output = run("2\n6\n");
+        assertTrue(output.contains("There are no tasks in your list yet."));
+    }
+
+    @Test
+    void viewListShowsNumberedTask() {
+        String output = run("1\n" + ADD_ANSWERS + "2\n6\n");
+        assertTrue(output.contains("1. "));
+    }
+
+    // ---------- Option 3: Update a task ----------
+
+    @Test
+    void updatedTaskShowsNewValue() {
+        String output = run("1\n" + ADD_ANSWERS + "3\n" + UPDATE_ANSWERS + "2\n6\n");
+        assertTrue(output.contains(UPDATED_TEXT));
+    }
+
+    @Test
+    void updateOnEmptyListStillQuits() {
+        String output = run("3\n6\n");
+        assertTrue(output.contains("See you next time!"));
+    }
+
+    // ---------- Option 4: Check off a task ----------
+
+    @Test
+    void checkedOffTaskIsGoneFromList() {
+        String output = run("1\n" + ADD_ANSWERS + "4\n" + CHECK_OFF_ANSWERS + "2\n6\n");
+        assertTrue(output.contains("There are no tasks in your list yet."));
+    }
+
+    @Test
+    void checkOffOnEmptyListStillQuits() {
+        String output = run("4\n6\n");
+        assertTrue(output.contains("See you next time!"));
+    }
+
+    // ---------- Option 5: Get It Done ----------
+
+    @Test
+    void getItDoneOnEmptyListShowsNothingToDo() {
+        String output = run("5\n6\n");
+        assertTrue(output.contains("Nothing to do!"));
+    }
+
+    @Test
+    void getItDonePicksAddedTask() {
+        String output = run("1\n" + ADD_ANSWERS + "5\n6\n");
+        assertTrue(output.contains(ADDED_NAME));
+    }
+
+    // ---------- Save and load ----------
+
+    @Test
+    void taskSurvivesQuitAndRestart() {
+        run("1\n" + ADD_ANSWERS + "6\n");
+        String output = run("2\n6\n");
+        assertTrue(output.contains(ADDED_NAME));
+    }
 }

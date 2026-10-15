@@ -1,120 +1,107 @@
 package Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.time.LocalDateTime;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
-import GetItDone;
 import LinkedChain;
 import Task;
 
-/*
- * Tests for GetItDone.
- *
- * @author [YOUR NAME HERE]
- * @version 2026.10.15
- */
+import java.time.LocalDateTime;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
+/**
+* @author Cassidy McCahill
+* @version 2026.10.15
+*/
 
 public class GetItDoneTest {
 
-    private PrintStream originalOut;
-    private ByteArrayOutputStream output;
-    private LinkedChain<Task> tasks;
-
-    /*
-    Starts each test with an empty chain and captures System.out.
-    */
-
-    @BeforeEach
-    public void setUp() {
-        this.originalOut = System.out;
-        this.output = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(this.output));
-        this.tasks = new LinkedChain<Task>();
+    private String capture(LinkedChain<Task> tasks) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PrintStream original = System.out;
+        System.setOut(new PrintStream(out));
+        try {
+            GetItDone.show(tasks);
+        } finally {
+            System.setOut(original);
+        }
+        return out.toString();
     }
-
-    /*
-    Puts System.out back.
-    */
-
-    @AfterEach
-    public void tearDown() {
-        System.setOut(this.originalOut);
-    }
-
-    /*
-    The task with the earlier date wins.
-    */
 
     @Test
-    public void testPickEarliestDate() {
-        this.tasks.addToEnd(new Task("Essay",
-            LocalDateTime.of(2030, 10, 5, 9, 0), "not started", "low"));
-        this.tasks.addToEnd(new Task("Quiz",
-            LocalDateTime.of(2030, 10, 3, 9, 0), "not started", "low"));
-        assertEquals("Quiz", GetItDone.pick(this.tasks).getName());
-    }
+    void pickChoosesEarliestDueDate() {
+        LinkedChain<Task> tasks = new LinkedChain<>();
+        Task later = new Task("Later", LocalDateTime.of(2026, 10, 25, 9, 0), "not started", "high");
+        Task sooner = new Task("Sooner", LocalDateTime.of(2026, 10, 20, 9, 0), "not started", "low");
+        tasks.add(later);
+        tasks.add(sooner);
 
-    /*
-    On the same date, higher priority wins, even if its time is later.
-    */
+        assertSame(sooner, GetItDone.pick(tasks));
+    }
 
     @Test
-    public void testPickHigherPriority() {
-        this.tasks.addToEnd(new Task("Laundry",
-            LocalDateTime.of(2030, 10, 3, 9, 0), "not started", "low"));
-        this.tasks.addToEnd(new Task("Lab",
-            LocalDateTime.of(2030, 10, 3, 17, 0), "not started", "high"));
-        assertEquals("Lab", GetItDone.pick(this.tasks).getName());
+    void pickNullChainThrows() {
+        try {
+            GetItDone.pick(null);
+            fail("Expected a NullPointerException");
+        } catch (NullPointerException e) {
+            // expected
+        }
     }
-
-    /*
-    An empty chain gives null.
-    */
 
     @Test
-    public void testPickEmpty() {
-        assertNull(GetItDone.pick(this.tasks));
+    void pickEmptyChainReturnsNull() {
+        LinkedChain<Task> tasks = new LinkedChain<>();
+        assertNull(GetItDone.pick(tasks));
     }
-
-    /*
-    If every task is complete, there's nothing to pick.
-    */
 
     @Test
-    public void testPickAllComplete() {
-        this.tasks.addToEnd(new Task("Essay",
-            LocalDateTime.of(2030, 10, 5, 9, 0), "complete", "high"));
-        assertNull(GetItDone.pick(this.tasks));
-    }
+    void pickSkipsCompleteTasks() {
+        LinkedChain<Task> tasks = new LinkedChain<>();
+        Task done = new Task("Done", LocalDateTime.of(2026, 10, 18, 9, 0), "complete", "high");
+        Task open = new Task("Open", LocalDateTime.of(2026, 10, 25, 9, 0), "not started", "low");
+        tasks.add(done);
+        tasks.add(open);
 
-    /*
-    show prints the picked task.
-    */
+        assertSame(open, GetItDone.pick(tasks));
+    }
 
     @Test
-    public void testShow() {
-        Task lab = new Task("Lab 3", LocalDateTime.of(2030, 10, 3, 9, 0),
-            "not started", "medium");
-        this.tasks.addToEnd(lab);
-        GetItDone.show(this.tasks);
-        assertTrue(this.output.toString().contains(lab.toString()));
-    }
+    void pickBreaksDateTieWithPriority() {
+        LinkedChain<Task> tasks = new LinkedChain<>();
+        Task low = new Task("Low", LocalDateTime.of(2026, 10, 20, 9, 0), "not started", "low");
+        Task high = new Task("High", LocalDateTime.of(2026, 10, 20, 17, 0), "not started", "high");
+        tasks.add(low);
+        tasks.add(high);
 
-    /*
-    show on an empty chain prints "Nothing to do!" without crashing.
-    */
+        assertSame(high, GetItDone.pick(tasks));
+    }
 
     @Test
-    public void testShowEmpty() {
-        GetItDone.show(this.tasks);
-        assertTrue(this.output.toString().contains("Nothing to do!"));
+    void showPrintsPickedTask() {
+        LinkedChain<Task> tasks = new LinkedChain<>();
+        Task only = new Task("Only", LocalDateTime.of(2026, 10, 20, 9, 0), "not started", "medium");
+        tasks.add(only);
+
+        String output = capture(tasks);
+
+        assertTrue(output.contains(only.toString()));
     }
 
+    @Test
+    void showNullChainThrows() {
+        try {
+            GetItDone.show(null);
+            fail("Expected a NullPointerException");
+        } catch (NullPointerException e) {
+            // expected
+        }
+    }
+
+    @Test
+    void showEmptyChainPrintsNothingToDo() {
+        LinkedChain<Task> tasks = new LinkedChain<>();
+        String output = capture(tasks);
+        assertTrue(output.contains("Nothing to do!"));
+    }
 }

@@ -1,252 +1,240 @@
 package Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
-import InputValidator;
-
-/*
- * Tests for InputValidator. Each Scanner is built from a string, with one
- * typed answer per line, so the tests don't need a real keyboard.
- *
- * @author [YOUR NAME HERE]
- * @version 2026.10.15
- */
+/**
+* @author Cassidy McCahill
+* @version 2026.10.15
+*/
 
 public class InputValidatorTest {
 
     private PrintStream originalOut;
-    private ByteArrayOutputStream output;
+    private ByteArrayOutputStream out;
 
-    /*
-    Sends System.out into output so we can check what was printed.
-    */
-
+    // Capture printed output so tests can check error messages
     @BeforeEach
-    public void setUp() {
-        this.originalOut = System.out;
-        this.output = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(this.output));
+    void captureOutput() {
+        originalOut = System.out;
+        out = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(out));
     }
-
-    /*
-    Puts System.out back.
-    */
 
     @AfterEach
-    public void tearDown() {
-        System.setOut(this.originalOut);
+    void restoreOutput() {
+        System.setOut(originalOut);
     }
 
-    /*
-    Counts how many times a message was printed.
-    @param message the message to look for
-    @return how many times it shows up in the output
-    */
-
-    private int timesPrinted(String message) {
-        String text = this.output.toString();
-        int count = 0;
-        int index = text.indexOf(message);
-        while (index != -1) {
-            count++;
-            index = text.indexOf(message, index + 1);
-        }
-        return count;
+    private Scanner scan(String input) {
+        return new Scanner(new ByteArrayInputStream(input.getBytes()));
     }
 
-    /*
-    A normal name comes back as typed.
-    */
+    private String printed() {
+        return out.toString();
+    }
+
+    private String futureDate() {
+        return LocalDate.now().plusDays(10).format(DateTimeFormatter.ofPattern("MM-dd-uuuu"));
+    }
+
+    // ---------- readName ----------
+
+    // normal case
+    @Test
+    void readNameReturnsValidName() {
+        assertEquals("Buy groceries", InputValidator.readName(scan("Buy groceries\n")));
+    }
 
     @Test
-    public void testReadName() {
-        Scanner in = new Scanner("Buy textbook\n");
-        assertEquals("Buy textbook", InputValidator.readName(in));
+    void readNameTrimsWhitespace() {
+        assertEquals("Buy groceries", InputValidator.readName(scan("   Buy groceries   \n")));
     }
 
-    /*
-    A blank name is rejected once, then the next name is accepted.
-    */
+    // bad-input cases
+    @Test
+    void readNameRejectsEmptyName() {
+        String result = InputValidator.readName(scan("\nBuy groceries\n"));
+        assertEquals("Buy groceries", result);
+        assertTrue(printed().contains("The task name can't be empty"));
+    }
 
     @Test
-    public void testReadNameEmpty() {
-        Scanner in = new Scanner("\nBuy textbook\n");
-        assertEquals("Buy textbook", InputValidator.readName(in));
-        assertEquals(1, this.timesPrinted("can't be empty"));
+    void readNameRejectsPipeCharacter() {
+        String result = InputValidator.readName(scan("Buy|groceries\nBuy groceries\n"));
+        assertEquals("Buy groceries", result);
+        assertTrue(printed().contains("The task name can't contain |"));
     }
 
-    /*
-    A name with | is rejected so the save file stays readable.
-    */
+    // ---------- readYesNo ----------
+
+    // normal cases
+    @Test
+    void readYesNoAcceptsY() {
+        assertTrue(InputValidator.readYesNo(scan("y\n")));
+    }
 
     @Test
-    public void testReadNameWithPipe() {
-        Scanner in = new Scanner("Lab | part 2\nLab part 2\n");
-        assertEquals("Lab part 2", InputValidator.readName(in));
-        assertEquals(1, this.timesPrinted("can't contain |"));
+    void readYesNoAcceptsUppercaseN() {
+        assertFalse(InputValidator.readYesNo(scan("N\n")));
     }
 
-    /*
-    A real future date is returned.
-    */
+    // bad-input case
+    @Test
+    void readYesNoRejectsOtherAnswers() {
+        boolean result = InputValidator.readYesNo(scan("maybe\ny\n"));
+        assertTrue(result);
+        assertTrue(printed().contains("Please enter y or n"));
+    }
+
+    // ---------- readDate ----------
+
+    // normal case
+    @Test
+    void readDateAcceptsFutureDate() {
+        LocalDate expected = LocalDate.now().plusDays(10);
+        assertEquals(expected, InputValidator.readDate(scan(futureDate() + "\n")));
+    }
+
+    // bad-input cases
+    @Test
+    void readDateRejectsNonsense() {
+        LocalDate result = InputValidator.readDate(scan("abc\n" + futureDate() + "\n"));
+        assertEquals(LocalDate.now().plusDays(10), result);
+        assertTrue(printed().contains("Enter a real date as MM-DD-YYYY"));
+    }
 
     @Test
-    public void testReadDate() {
-        Scanner in = new Scanner("10-02-2030\n");
-        assertEquals(LocalDate.of(2030, 10, 2),
-            InputValidator.readDate(in));
+    void readDateRejectsImpossibleDate() {
+        LocalDate result = InputValidator.readDate(scan("02-30-2030\n" + futureDate() + "\n"));
+        assertEquals(LocalDate.now().plusDays(10), result);
+        assertTrue(printed().contains("Enter a real date as MM-DD-YYYY"));
     }
-
-    /*
-    An impossible date is rejected once, then the next date is accepted.
-    */
 
     @Test
-    public void testReadDateImpossible() {
-        Scanner in = new Scanner("02-30-2030\n03-01-2030\n");
-        assertEquals(LocalDate.of(2030, 3, 1), InputValidator.readDate(in));
-        assertEquals(1,
-            this.timesPrinted("Enter a real date as MM-DD-YYYY"));
+    void readDatePastDateDeclinedAsksAgain() {
+        LocalDate result = InputValidator.readDate(scan("01-01-2020\nn\n" + futureDate() + "\n"));
+        assertEquals(LocalDate.now().plusDays(10), result);
+        assertTrue(printed().contains("That date has already passed"));
     }
-
-    /*
-    A past date warns, and "y" keeps it.
-    */
 
     @Test
-    public void testReadDatePastKeep() {
-        Scanner in = new Scanner("01-15-2020\ny\n");
-        assertEquals(LocalDate.of(2020, 1, 15),
-            InputValidator.readDate(in));
-        assertEquals(1, this.timesPrinted("That date has already passed"));
+    void readDatePastDateKeptWhenConfirmed() {
+        LocalDate result = InputValidator.readDate(scan("01-01-2020\ny\n"));
+        assertEquals(LocalDate.of(2020, 1, 1), result);
     }
 
-    /*
-    A past date warns, and "n" asks for a new date.
-    */
+    // ---------- readTime ----------
+
+    // normal cases
+    @Test
+    void readTimeAcceptsValidTime() {
+        assertEquals(LocalTime.of(9, 30), InputValidator.readTime(scan("09:30\n")));
+    }
 
     @Test
-    public void testReadDatePastReenter() {
-        Scanner in = new Scanner("01-15-2020\nn\n12-01-2030\n");
-        assertEquals(LocalDate.of(2030, 12, 1),
-            InputValidator.readDate(in));
-        assertEquals(1, this.timesPrinted("That date has already passed"));
+    void readTimeAcceptsLastMinuteOfDay() {
+        assertEquals(LocalTime.of(23, 59), InputValidator.readTime(scan("23:59\n")));
     }
 
-    /*
-    A real time is returned.
-    */
+    // bad-input cases
+    @Test
+    void readTimeRejectsHourTooLarge() {
+        LocalTime result = InputValidator.readTime(scan("25:00\n09:30\n"));
+        assertEquals(LocalTime.of(9, 30), result);
+        assertTrue(printed().contains("Enter a time as HH:MM"));
+    }
 
     @Test
-    public void testReadTime() {
-        Scanner in = new Scanner("17:00\n");
-        assertEquals(LocalTime.of(17, 0), InputValidator.readTime(in));
+    void readTimeRejectsNonsense() {
+        LocalTime result = InputValidator.readTime(scan("abc\n09:30\n"));
+        assertEquals(LocalTime.of(9, 30), result);
+        assertTrue(printed().contains("Enter a time as HH:MM"));
     }
 
-    /*
-    A bad time is rejected once, then the next time is accepted.
-    */
+    // ---------- readStatus ----------
+
+    // normal cases
+    @Test
+    void readStatusAcceptsValidStatus() {
+        assertEquals("complete", InputValidator.readStatus(scan("complete\n")));
+    }
 
     @Test
-    public void testReadTimeBad() {
-        Scanner in = new Scanner("25:70\n09:30\n");
-        assertEquals(LocalTime.of(9, 30), InputValidator.readTime(in));
-        assertEquals(1,
-            this.timesPrinted("Enter a time as HH:MM (00:00 to 23:59)"));
+    void readStatusIsCaseInsensitive() {
+        assertEquals("in-progress", InputValidator.readStatus(scan("IN-PROGRESS\n")));
     }
 
-    /*
-    Capital letters are fine and come back lowercase.
-    */
+    // bad-input case
+    @Test
+    void readStatusRejectsUnknownStatus() {
+        String result = InputValidator.readStatus(scan("done\nnot started\n"));
+        assertEquals("not started", result);
+        assertTrue(printed().contains("Your options are: not started, in-progress, complete"));
+    }
+
+    // ---------- readPriority ----------
+
+    // normal cases
+    @Test
+    void readPriorityAcceptsValidPriority() {
+        assertEquals("high", InputValidator.readPriority(scan("high\n")));
+    }
 
     @Test
-    public void testReadStatus() {
-        Scanner in = new Scanner("In-Progress\n");
-        assertEquals("in-progress", InputValidator.readStatus(in));
+    void readPriorityIsCaseInsensitive() {
+        assertEquals("medium", InputValidator.readPriority(scan("Medium\n")));
     }
 
-    /*
-    A status that isn't an option shows the options and asks again.
-    */
+    // bad-input case
+    @Test
+    void readPriorityRejectsUnknownPriority() {
+        String result = InputValidator.readPriority(scan("urgent\nlow\n"));
+        assertEquals("low", result);
+        assertTrue(printed().contains("Your options are: low, medium, high"));
+    }
+
+    // ---------- readMenuChoice ----------
+
+    // normal cases
+    @Test
+    void readMenuChoiceAcceptsNumberInRange() {
+        assertEquals(3, InputValidator.readMenuChoice(scan("3\n"), 1, 6));
+    }
 
     @Test
-    public void testReadStatusBad() {
-        Scanner in = new Scanner("urgent\nnot started\n");
-        assertEquals("not started", InputValidator.readStatus(in));
-        assertEquals(1, this.timesPrinted("Your options are"));
+    void readMenuChoiceAcceptsBothEnds() {
+        assertEquals(1, InputValidator.readMenuChoice(scan("1\n"), 1, 6));
+        assertEquals(6, InputValidator.readMenuChoice(scan("6\n"), 1, 6));
     }
 
-    /*
-    Capital letters are fine and come back lowercase.
-    */
+    // bad-input cases
+    @Test
+    void readMenuChoiceRejectsTooSmall() {
+        int result = InputValidator.readMenuChoice(scan("0\n3\n"), 1, 6);
+        assertEquals(3, result);
+        assertTrue(printed().contains("Enter a number from 1 to 6"));
+    }
 
     @Test
-    public void testReadPriority() {
-        Scanner in = new Scanner("HIGH\n");
-        assertEquals("high", InputValidator.readPriority(in));
+    void readMenuChoiceRejectsTooLarge() {
+        int result = InputValidator.readMenuChoice(scan("7\n3\n"), 1, 6);
+        assertEquals(3, result);
+        assertTrue(printed().contains("Enter a number from 1 to 6"));
     }
-
-    /*
-    A priority that isn't an option shows the options and asks again.
-    */
 
     @Test
-    public void testReadPriorityBad() {
-        Scanner in = new Scanner("urgent\nhigh\n");
-        assertEquals("high", InputValidator.readPriority(in));
-        assertEquals(1, this.timesPrinted("Your options are"));
+    void readMenuChoiceRejectsText() {
+        int result = InputValidator.readMenuChoice(scan("abc\n3\n"), 1, 6);
+        assertEquals(3, result);
+        assertTrue(printed().contains("Enter a number from 1 to 6"));
     }
-
-    /*
-    A number in range is returned.
-    */
-
-    @Test
-    public void testReadMenuChoice() {
-        Scanner in = new Scanner("3\n");
-        assertEquals(3, InputValidator.readMenuChoice(in, 1, 6));
-    }
-
-    /*
-    Letters and out-of-range numbers are both rejected.
-    */
-
-    @Test
-    public void testReadMenuChoiceBad() {
-        Scanner in = new Scanner("abc\n9\n2\n");
-        assertEquals(2, InputValidator.readMenuChoice(in, 1, 6));
-        assertEquals(2, this.timesPrinted("Enter a number from 1 to 6"));
-    }
-
-    /*
-    "Y" (capital) counts as yes.
-    */
-
-    @Test
-    public void testReadYesNo() {
-        Scanner in = new Scanner("Y\n");
-        assertTrue(InputValidator.readYesNo(in));
-    }
-
-    /*
-    Anything other than y or n asks again.
-    */
-
-    @Test
-    public void testReadYesNoBad() {
-        Scanner in = new Scanner("maybe\nn\n");
-        assertFalse(InputValidator.readYesNo(in));
-        assertEquals(1, this.timesPrinted("Please enter y or n"));
-    }
-
 }

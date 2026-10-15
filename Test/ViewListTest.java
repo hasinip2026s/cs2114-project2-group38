@@ -1,78 +1,63 @@
 package Test;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.time.LocalDateTime;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import LinkedChain;
 import Task;
-import ViewList;
 
-/*
- * Tests for ViewList.
- *
- * @author [YOUR NAME HERE]
- * @version 2026.10.15
- */
+import java.time.LocalDateTime;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
+/**
+* @author Cassidy McCahill
+* @version 2026.10.15
+*/
 
 public class ViewListTest {
 
-    private PrintStream originalOut;
-    private ByteArrayOutputStream output;
-
-    /*
-    Captures System.out.
-    */
-
-    @BeforeEach
-    public void setUp() {
-        this.originalOut = System.out;
-        this.output = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(this.output));
+    private String capture(LinkedChain<Task> tasks) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PrintStream original = System.out;
+        System.setOut(new PrintStream(out));
+        try {
+            ViewList.show(tasks);
+        } finally {
+            System.setOut(original);
+        }
+        return out.toString();
     }
-
-    /*
-    Puts System.out back.
-    */
-
-    @AfterEach
-    public void tearDown() {
-        System.setOut(this.originalOut);
-    }
-
-    /*
-    Two tasks print as "1. ..." and "2. ..." in the order they were
-    added.
-    */
 
     @Test
-    public void testShowTwoTasks() {
-        LinkedChain<Task> tasks = new LinkedChain<Task>();
-        tasks.addToEnd(new Task("Buy textbook",
-            LocalDateTime.of(2030, 12, 1, 17, 0), "not started", "low"));
-        tasks.addToEnd(new Task("Laundry",
-            LocalDateTime.of(2030, 12, 2, 9, 0), "not started", "high"));
-
-        ViewList.show(tasks);
-
-        String text = this.output.toString();
-        assertTrue(text.contains("1. Buy textbook"));
-        assertTrue(text.contains("2. Laundry"));
+    void emptyListPrintsMessage() {
+        LinkedChain<Task> tasks = new LinkedChain<>();
+        String output = capture(tasks);
+        assertTrue(output.contains("There are no tasks in your list yet."));
     }
+   
+    @Test
+    void tasksArePrintedInOrderWithNumbers() {
+        LinkedChain<Task> tasks = new LinkedChain<>();
+        Task first = new Task("Buy groceries", LocalDateTime.of(2026, 10, 20, 9, 0), "not started", "low");
+        Task second = new Task("Finish project", LocalDateTime.of(2026, 10, 22, 17, 0), "in-progress", "high");
+        tasks.add(first);
+        tasks.add(second);
 
-    /*
-    An empty chain prints the empty-list message.
-    */
+        String output = capture(tasks);
+
+        assertTrue(output.contains("1. " + first));
+        assertTrue(output.contains("2. " + second));
+        assertTrue(output.indexOf("1. " + first) < output.indexOf("2. " + second));
+    }
 
     @Test
-    public void testShowEmpty() {
-        ViewList.show(new LinkedChain<Task>());
-        assertTrue(this.output.toString()
-            .contains("There are no tasks in your list yet."));
-    }
+    void nullChainThrows() {
+        try {
+            ViewList.show(null);
+            fail("Expected a NullPointerException");
+        } catch (NullPointerException e) {
 
+        }
+    }
 }
+
