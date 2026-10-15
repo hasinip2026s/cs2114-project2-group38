@@ -32,6 +32,7 @@ public class GetItDone {
         return top;
     }
     public static void show(LinkedChain<Task> tasks) {
+        System.out.println();
         Task top = pick(tasks);
 
         if (top == null) {

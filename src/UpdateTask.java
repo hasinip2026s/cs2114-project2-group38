@@ -17,10 +17,12 @@ public class UpdateTask {
         }
  
         ViewList.show(tasks);
+        System.out.println();
         System.out.println("Which task do you want to update?");
         int choice = InputValidator.readMenuChoice(in, 1, tasks.size());
         Task task = tasks.get(choice - 1);
- 
+
+        System.out.println();
         System.out.println("What do you want to change?");
         System.out.println("1. Status");
         System.out.println("2. Priority");
