@@ -8,6 +8,12 @@ import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+/*
+ * Saves the chain to a file and loads it back.
+ * Each line is one task: name|yyyy-MM-ddTHH:mm|status|priority
+ * @author [YOUR NAME HERE]
+ * @version 2026.10.15
+ */
 
 public class SaveLoadTasks {
 
@@ -49,15 +55,15 @@ public class SaveLoadTasks {
 
     /*
     Reads the file into a new chain. A missing or empty file gives an
-    empty chain. Lines with missing fields or a bad date are skipped
-    and counted.
+    empty chain. Lines with missing fields or a bad date are skipped;
+    they're kept in a LinkedChain<String> so we can count them.
     Big-O: O(n), one line per task and each addToEnd() is O(1).
     @return a chain with every task that could be read
     */
 
     public LinkedChain<Task> load() {
         LinkedChain<Task> tasks = new LinkedChain<Task>();
-        int skipped = 0;
+        LinkedChain<String> skippedLines = new LinkedChain<String>();
 
         try (Scanner file = new Scanner(new File(this.filePath))) {
             while (file.hasNextLine()) {
@@ -66,7 +72,7 @@ public class SaveLoadTasks {
                 String[] parts = line.split(Pattern.quote(DELIMITER), -1);
 
                 if (parts.length != 4) {
-                    skipped++;
+                    skippedLines.addToEnd(line);
                 }
                 else {
                     try {
@@ -75,7 +81,7 @@ public class SaveLoadTasks {
                             parts[3]));
                     }
                     catch (DateTimeParseException e) {
-                        skipped++;
+                        skippedLines.addToEnd(line);
                     }
                 }
             }
@@ -85,8 +91,8 @@ public class SaveLoadTasks {
             return tasks;
         }
 
-        if (skipped > 0) {
-            System.out.println("Skipped " + skipped
+        if (!skippedLines.isEmpty()) {
+            System.out.println("Skipped " + skippedLines.size()
                 + " unreadable task(s).");
         }
         return tasks;
