@@ -8,6 +8,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /**
 * @author Cassidy McCahill
@@ -16,12 +18,12 @@ import java.io.PrintStream;
 
 public class MainTest {
 
-    // EDIT THESE to match the prompts in AddTask, UpdateTask, and RemoveTask.
     // Each is only the answers typed AFTER the menu number, one per line.
-    private static final String ADD_ANSWERS = "Buy groceries\n2026-10-20 09:00\nnot started\nlow\n";
+    private static final String FUTURE_DATE = LocalDate.now().plusDays(7).format(DateTimeFormatter.ofPattern("MM-dd-yyyy"));
+    private static final String ADD_ANSWERS = "Buy groceries\n" + FUTURE_DATE + "\n09:00\nnot started\nlow\n";
     private static final String ADDED_NAME = "Buy groceries";
 
-    private static final String UPDATE_ANSWERS = "1\n";   // which task, plus whatever UpdateTask asks next
+    private static final String UPDATE_ANSWERS = "1\n1\ncomplete\n";  // which task, plus whatever UpdateTask asks next
     private static final String UPDATED_TEXT = "complete"; // text that should appear in the list after the update
 
     private static final String CHECK_OFF_ANSWERS = "1\n"; // which task to check off
@@ -57,7 +59,7 @@ public class MainTest {
     @Test
     void quitPrintsMenuAndGoodbye() {
         String output = run("6\n");
-        assertTrue(output.contains("Check it off Menu:"));
+        assertTrue(output.contains("Check It Off Menu:"));
         assertTrue(output.contains("See you next time!"));
     }
 

@@ -34,16 +34,17 @@ public class ViewListTest {
     @Test
     void tasksArePrintedInOrderWithNumbers() {
         LinkedChain<Task> tasks = new LinkedChain<>();
-        Task first = new Task("Buy groceries", LocalDateTime.of(2026, 10, 20, 9, 0), "not started", "low");
-        Task second = new Task("Finish project", LocalDateTime.of(2026, 10, 22, 17, 0), "in-progress", "high");
-        tasks.add(first);
-        tasks.add(second);
-
+        tasks.addToEnd(new Task("Buy groceries", LocalDateTime.of(2026, 10, 20, 9, 0),
+        "not started", "low"));
+tasks.addToEnd(new Task("Finish project", LocalDateTime.of(2026, 10, 22, 17, 0),
+        "in-progress", "high"));
+ 
         String output = capture(tasks);
-
-        assertTrue(output.contains("1. " + first));
-        assertTrue(output.contains("2. " + second));
-        assertTrue(output.indexOf("1. " + first) < output.indexOf("2. " + second));
+ 
+        // the message shows the real output if a check fails
+        assertTrue(output.contains("1. Buy groceries"), "Output was: " + output); 
+        assertTrue(output.contains("2. Finish project"), "Output was: " + output); 
+        assertTrue(output.indexOf("1. Buy groceries") < output.indexOf("2. Finish project"), "Output was: " + output);
     }
 
     @Test
