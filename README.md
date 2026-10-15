@@ -217,63 +217,72 @@ name|yyyy-MM-ddTHH:mm|status|priority
 
 | Unknown from our scope | Status | What we did |
 |---|---|---|
-| How to sort a `LinkedChain` by due date or priority | [TODO: figured out / still open] | [TODO: e.g. Get It Done doesn't need sorting; it finds the best task in one pass with the iterator] |
-| How to save and load the chain to a file | [TODO] | [TODO: e.g. one task per line with a `\|` delimiter, names with `\|` rejected, missing file gives an empty chain, bad lines skipped and counted] |
-| How to validate dates | [TODO] | [TODO: e.g. strict `LocalDate` parsing rejects 02-30-2026; compared to `LocalDate.now()` for past dates] |
+| How to sort a `LinkedChain` by due date or priority | [figured out] | [Get It Done doesn’t sort. It walks the chain once with the iterator and keeps the best task seen so far (earliest due date, ties broken by highest priority).] |
+| How to save and load the chain to a file | [Figured out] | [Main loads at startup and saves after every add, update, and check-off, and once more on Quit. readName rejects names containing] |
+| How to validate dates | [Figured out] | [	InputValidator parses MM-dd-uuuu with ResolverStyle.STRICT, so impossible dates like 02-30-2026 are rejected. It compares against LocalDate.now(), and for a past date it asks whether to keep it anyway (y/n). Time is parsed strictly as HH:mm.] |
 
 ### What doesn't work yet?
 
-- [TODO: missing or broken MVP features]
-- [TODO: bad-input cases that still crash or give the wrong response]
-- [TODO: tests that are missing or failing]
+- Everything works.
 
 ## Next Steps
 
 ### Finishing the MVP
 
-| Order | Remaining item | Owner |
-|---|---|---|
-| 1 | [TODO] | [TODO] |
-| 2 | [TODO] | [TODO] |
-| 3 | [TODO] | [TODO] |
+- MVP is finished.
+
 
 ### Stretch goals
 
 | Stretch goal | Decision | Owner |
 |---|---|---|
-| Count summary ("5 tasks: 2 not started, 2 in-progress, 1 high priority") | Committed | [TODO] |
-| Multiple lists (Homework, Groceries, Errands) | [TODO: committed or dropped] | [TODO] |
-| Sorting by due date, priority, or status | [TODO: committed or dropped] | [TODO] |
-| Overdue flag | [TODO: committed or dropped] | [TODO] |
-| Undo last removal | [TODO: committed or dropped] | [TODO] |
+| Count summary ("5 tasks: 2 not started, 2 in-progress, 1 high priority") | Committed | [Hasini] |
+| Multiple lists (Homework, Groceries, Errands) |  [dropped] | [Both] |
+| Sorting by due date, priority, or status | [dropped] | [No one] |
+| Overdue flag | [dropped] | [No one] |
+| Undo last removal | [dropped] | [No one] |
 
 ### New tests we'll need
 
 | Method | Normal case | Bad-input case |
 |---|---|---|
-| [TODO: count summary method] | [TODO: e.g. mixed list prints the right counts] | [TODO: e.g. empty list prints 0 tasks with no crash] |
-| [TODO] | [TODO] | [TODO] |
+| MultipleLists.createList(name) | Creating "Groceries" takes the number of lists from 1 to 2 | A duplicate name (any capitalization), an empty name, or a name containing `\|` is rejected and the number of lists stays the same |
+| Add / view with two lists | A task added to "Homework" shows up there and not in "Groceries" | Viewing an empty list prints "There are no tasks in your list yet." and doesn't show another list's tasks |
+| MultipleList.selectList() | Picking list 2 of 3 makes it the active list | "0", "99", or "abc" re-prompts and the active list doesn't change |
+| SaveLoadTasks save() then load() | Two lists with 2 and 1 tasks come back with the same names, tasks, and order | A list with zero tasks is still there after reload |
+| MainTest (full flow) | Create a list, add a task, quit, restart: both are still there | A corrupted line in one list is skipped and counted, and the other lists load normally |
 
 ## Attribution
 
 | File | Team member(s) | How (wrote, revised, reviewed, tested, GenAI-assisted, …) |
 |---|---|---|
-| `Main.java` | [TODO] | [TODO] |
-| `Task.java` | [TODO] | [TODO] |
-| `LinkedChain.java` | Provided by the course; changes by [TODO] | [TODO] |
-| `InputValidator.java` | [TODO] | [TODO] |
-| `AddTask.java` | [TODO] | [TODO] |
-| `ViewList.java` | [TODO] | [TODO] |
-| `UpdateTask.java` | [TODO] | [TODO] |
-| `RemoveTask.java` | [TODO] | [TODO] |
-| `GetItDone.java` | [TODO] | [TODO] |
-| `SaveLoadTasks.java` | [TODO] | [TODO] |
-| [TODO: each test file] | [TODO] | [TODO] |
-| `README.md` | [TODO] | [TODO] |
+| `Main.java` | Cassidy | [Drafted on my own using the spec, then used GenAI to refine, assist/ find errors and point out what may be missing (or how the code could function more efficiently). I took that input and appplied it to the code, and then finalized it.] |
+| `Task.java` | Hasini | [TODO] |
+| `LinkedChain.java` | Provided by the course; changes by Hasini | [TODO] |
+| `InputValidator.java` | Cassidy | [Drafted on my own using the spec, then used GenAI to refine, assist/ find errors and point out what may be missing (or how the code could function more efficiently). I took that input and appplied it to the code, and then finalized it.] |
+| `AddTask.java` | Hasini | [TODO] |
+| `ViewList.java` | Cassidy | [Drafted on my own using the spec, then used GenAI to refine, assist/ find errors and point out what may be missing (or how the code could function more efficiently). I took that input and appplied it to the code, and then finalized it.]  |
+| `UpdateTask.java` | Hasini | [TODO] |
+| `RemoveTask.java` | Hasini | [TODO] |
+| `GetItDone.java` | Cassidy | [Drafted on my own using the spec, then used GenAI to refine, assist/ find errors and point out what may be missing (or how the code could function more efficiently). I took that input and appplied it to the code, and then finalized it.]  |
+| `SaveLoadTasks.java` | Hasini | [TODO] |
+| `CountSummary.java` | Hasini | [TODO] |
+| `MainTest.java` | Cassidy | [Used GenAI to suggest edge-case tests, while also trying to figure out the testing on my own. Used GenAI check if I was testing everything correctly, and implemented the feedback into my code.] |
+| `TaskTest.java` | Hasini | [TODO] |
+| `LinkedChainTest.java` | Hasini | [TODO] |
+| `InputValidatorTest.java` | Cassidy | [Used GenAI to suggest edge-case tests, while also trying to figure out the testing on my own. Used GenAI check if I was testing everything correctly, and implemented the feedback into my code.] |
+| `AddTaskTest.java` | Hasini | [TODO] |
+| `ViewListTest.java` | Cassidy | [Used GenAI to suggest edge-case tests, while also trying to figure out the testing on my own. Used GenAI check if I was testing everything correctly, and implemented the feedback into my code.] |
+| `UpdateTaskTest.java` | Hasini | [TODO] |
+| `RemoveTaskTest.java` | Hasini | [TODO] |
+| `GetItDoneTest.java` | Cassidy | [Used GenAI to suggest edge-case tests, while also trying to figure out the testing on my own. Used GenAI check if I was testing everything correctly, and implemented the feedback into my code.] |
+| `CountSummaryTest.java` | Hasini | [TODO] |
+| `SaveLoadTasksTest.java` | Hasini | [TODO] |
+| `README.md` | Cassidy & Hasini | [Drafted on our own, then used GenAI to correct and format our respone. GenAI also helped draft our tests for multiple lists.] |
 
 ### How we used GenAI
 
-[TODO: Which files or sections GenAI helped with, what you asked it for (e.g. drafting, reviewing, suggesting edge-case tests), and how you checked its output before keeping it.]
+[We used GenAI in everyfile but for different reasons, in our regular files we used AI to look over and review our drafted code and give us feedback that were able to implement. For the testing files, we use GenAI to suggest edge-case tests and check over/ review our testing code. In the regular files, we checked it is output by seeing its result in the terminal as well as walking through the code and interpreting what it was doing on our own making sure it was producing what our idea was. For testing files, we were able to see the failures through vscode to see if the GenAI output was working correctly.]
 
 ## Notes
 
