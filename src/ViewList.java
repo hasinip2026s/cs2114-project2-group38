@@ -13,7 +13,6 @@ public class ViewList {
     */
 
     public static void show(LinkedChain<Task> tasks) {
-        System.out.println();
         if (tasks.isEmpty()) {
             System.out.println("There are no tasks in your list yet.");
         }
@@ -23,6 +22,7 @@ public class ViewList {
                 System.out.println(i + ". " + task);
                 i++;
             }
+            System.out.println(CountSummary.summarize(tasks));
         }
     }
 }
