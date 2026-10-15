@@ -9,8 +9,9 @@ import java.util.Objects;
  * @version 2026.10.14
  */
 
-public class Task {
 
+public class Task {
+ 
     private String name;
     private LocalDateTime due;
     private String status;
@@ -23,14 +24,14 @@ public class Task {
     @param status   "not started", "in-progress", or "complete"
     @param priority "low", "medium", or "high"
     */
-
+ 
     public Task(String name, LocalDateTime due, String status, String priority) {
         this.name = name;
         this.due = due;
         this.status = status;
         this.priority = priority;
     }
-
+ 
     /*
     @return the task's name
     */
@@ -38,12 +39,12 @@ public class Task {
     public String getName() {
         return this.name;
     } 
-
-
+ 
+ 
     /*
     @return the due date and time
     */
-
+ 
     public LocalDateTime getDue() {
         return this.due;
     }
@@ -51,7 +52,7 @@ public class Task {
     /*
     @return the status
     */
-
+ 
     public String getStatus() {
         return this.status;
     }
@@ -59,7 +60,7 @@ public class Task {
     /*
     @return the priority
     */
-
+ 
     public String getPriority() {
         return this.priority;
     }
@@ -68,7 +69,7 @@ public class Task {
     Changes the status.
     @param status the new status
     */
-
+ 
     public void setStatus(String status) {
         this.status = status;
     }
@@ -81,12 +82,12 @@ public class Task {
     public void setPriority(String priority) {
         this.priority = priority;
     }
-
+ 
     /*
     Turns the priority into a number so GetItDone can compare tasks.
     @return 3 for high, 2 for medium, 1 for low
     */
-
+ 
     public int getPriorityRank() {
         if (this.priority.equals("high")) {
             return 3;
@@ -98,7 +99,7 @@ public class Task {
             return 1;
         }
     }
-
+ 
     /*
     Checks if two tasks are the same. The name can have different
     capital letters, but everything else has to match exactly.
@@ -106,7 +107,7 @@ public class Task {
     @return true if they're the same task, false if not (or if other
             is null or isn't a Task)
     */
-
+ 
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof Task)) {
@@ -118,25 +119,25 @@ public class Task {
             && this.status.equals(that.status)
             && this.priority.equals(that.priority);
     }
-
+ 
     /*
     Matches equals. The name is lowercased because equals ignores
     capital letters.
     @return the hash code
     */
-
+ 
     @Override
     public int hashCode() {
         return Objects.hash(this.name.toLowerCase(), this.due, this.status,
             this.priority);
     }
-
+ 
     /*
     Shows the task on one line, like:
     Buy textbook — due 10-02-2026 17:00 — not started — low
     @return the task as a string
     */
-
+ 
     @Override
     public String toString() {
         DateTimeFormatter format =
@@ -144,5 +145,5 @@ public class Task {
         return this.name + " — due " + this.due.format(format) + " — "
             + this.status + " — " + this.priority;
     }
-
+ 
 }
