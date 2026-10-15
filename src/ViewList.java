@@ -1,4 +1,15 @@
+/**
+ * Shows/ displays the task list.
+ * @author Cassidy McCahill
+ * @version 2026.10.14
+ */
+
 public class ViewList {
+
+    /*
+    * Prints out the task numbered task list. 
+    * Prints out a message stating that there are no tasks if the list is empty.
+    */
 
     public static void show(LinkedChain<Task> tasks) {
         if (tasks.isEmpty()) {

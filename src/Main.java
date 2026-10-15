@@ -1,5 +1,10 @@
 import java.util.Scanner;
 
+/**
+* @author Cassidy McCahill
+* @version 2026.10.14
+*/
+
 public class Main {
 
     private static final String SAVE_FILE = "tasks.txt";
