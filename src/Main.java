@@ -1,13 +1,18 @@
 import java.util.Scanner;
 
 /**
-* @author Cassidy McCahill
-* @version 2026.10.14
-*/
+ * 
+ * @author Cassidy McCahill
+ * @version 2026.10.14
+ */
 
 public class Main {
+
     private static final String SAVE_FILE = "tasks.txt";
 
+    /*
+    * Prints out the menu.
+    */
     private static void printMenu() {
         System.out.println("Check it off Menu:");
         System.out.println("1. Add a task");
@@ -17,6 +22,13 @@ public class Main {
         System.out.println("5. Get It Done");
         System.out.println("6. Quit");
     }
+
+    /*
+    * Makes the menu functionable. 
+    * Choice 1 adds the task, choice 2 lets the user view the task list, choice 3 updates and saves the task,
+    * choice 4 removes and saves the task, choice 5 shows the most important task (GetItDone), choice 6 ends the program.
+    @param args
+    */
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         SaveLoadTasks saver = new SaveLoadTasks(SAVE_FILE);
