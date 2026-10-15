@@ -12,13 +12,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/*
- * Tests for SaveLoadTasks. Uses its own test file so it never touches
- * the real tasks.txt.
- *
- * @author [YOUR NAME HERE]
- * @version 2026.10.15
- */
 
 public class SaveLoadTasksTest {
 

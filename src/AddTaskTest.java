@@ -10,12 +10,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/*
- * Tests for AddTask.
- *
- * @author [YOUR NAME HERE]
- * @version 2026.10.15
- */
 
 public class AddTaskTest {
 
