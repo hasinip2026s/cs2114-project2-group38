@@ -14,6 +14,7 @@ public class Main {
     * Prints out the menu.
     */
     private static void printMenu() {
+        System.out.println();
         System.out.println("Check It Off Menu:");
         System.out.println("1. Add a task");
         System.out.println("2. View tasks");
