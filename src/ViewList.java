@@ -7,7 +7,7 @@ public class ViewList {
         else {
             int i = 1
             for (Task task : tasks) {
-                System.out.println(i +". "+ task);
+                System.out.println(i + ". " + task);
                 i++;
             }
         }
