@@ -8,7 +8,7 @@ public class ViewList {
             int i = 1
             for (Task task : tasks) {
                 System.out.println(i +". "+ task);
-                i++
+                i++;
             }
         }
     }
