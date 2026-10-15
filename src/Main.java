@@ -14,7 +14,7 @@ public class Main {
     * Prints out the menu.
     */
     private static void printMenu() {
-        System.out.println("Check it off Menu:");
+        System.out.println("Check It Off Menu:");
         System.out.println("1. Add a task");
         System.out.println("2. View tasks");
         System.out.println("3. Update a task");
@@ -34,7 +34,10 @@ public class Main {
         SaveLoadTasks saver = new SaveLoadTasks(SAVE_FILE);
         LinkedChain<Task> tasks = saver.load();
 
-        while (true) {
+        ViewList.show(tasks);
+
+        boolean running = true;
+        while (running) {
             printMenu();
             int choice = InputValidator.readMenuChoice(scanner, 1, 6);
 
@@ -58,11 +61,13 @@ public class Main {
             else if (choice == 5) {
                 GetItDone.show(tasks);
             }
-            else if (choice == 6) {
+            else {
                 saver.save(tasks);
                 System.out.println("See you next time!");
-                break;
+                running = false;
             }
         }
+        scanner.close();
     }
+
 }
