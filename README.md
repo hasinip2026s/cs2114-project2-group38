@@ -60,8 +60,10 @@ cs2114-project2-group38/
     ├── CountSummaryTest.java
     └── SaveLoadTasksTest.java
 ```
-
 The tests live in `src` next to the classes they test, so everything is in the same (default) package.
+## System Diagram
+
+<img width="3080" height="1408" alt="system-diagram-updated" src="https://github.com/user-attachments/assets/51a5c6c7-1048-47b6-a6be-6deb94739db9" />
 
 ## Getting Started
 
