@@ -15,7 +15,6 @@ public class RemoveTask {
 
     public static boolean remove(LinkedChain<Task> tasks, Scanner in) {
         if (tasks.isEmpty()) {
-            System.out.println();
             System.out.println("No tasks yet.");
             return false;
         }
@@ -31,7 +30,6 @@ public class RemoveTask {
         }
 
         if (matches.isEmpty()) {
-            System.out.println();
             System.out.println("No task named " + name + " found");
             return false;
         }

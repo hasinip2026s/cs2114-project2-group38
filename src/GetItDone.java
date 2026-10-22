@@ -39,6 +39,7 @@ public class GetItDone {
             System.out.println("Nothing to do!");
         }
         else {
+            System.out.println("Get It Done!");
             System.out.println(top);
         }
     }

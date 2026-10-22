@@ -22,6 +22,7 @@ public class Main {
         System.out.println("4. Check off a task");
         System.out.println("5. Get It Done");
         System.out.println("6. Quit");
+        System.out.println();
     }
 
     /*
@@ -35,6 +36,7 @@ public class Main {
         SaveLoadTasks saver = new SaveLoadTasks(SAVE_FILE);
         LinkedChain<Task> tasks = saver.load();
         System.out.println();
+        System.out.println("Tasks:");
         ViewList.show(tasks);
 
         boolean running = true;

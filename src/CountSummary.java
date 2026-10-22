@@ -35,6 +35,7 @@ public class CountSummary {
         if (tasks.size() == 1) {
             word = "task";
         }
+        System.out.println();
         return tasks.size() + " " + word + ": " + notStarted
             + " not started, " + inProgress + " in-progress, " + high
             + " high priority.";
